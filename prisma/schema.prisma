@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite" // Troque para "postgresql" se for PostgreSQL
+  url      = env("DATABASE_URL")
+}
+
+
+//Modelo de usuário:
+model User{
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(CLIENT)
+  appointments Appointment[]
+  appointment_date DateTime @default(now())
+  createdAt DateTime @default(now()) // 🔹 Adicionado de volta
+}
+
+// Modelo para serviços (ex: corte de cabelo, massagem)
+model Service {
+  id       String  @id @default(uuid())
+  name     String
+  duration Int
+  price    Float
+  appointments Appointment[] // Adicionando o campo de relação oposto para agendamentos do serviço
+}
+
+// Modelo para agendamentos
+model Appointment {
+  id              String  @id @default(uuid())
+  userId          String 
+  serviceId       String
+  user User       @relation(fields: [userId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])   
+  createdAt  DateTime @default(now())
+}
+
+// Enum para definir se o usuário é um cliente ou profissional
+enum Role {
+  CLIENT
+  PROFESSIONAL
+}
